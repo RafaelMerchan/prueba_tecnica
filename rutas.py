@@ -1,7 +1,14 @@
 from fastapi import APIRouter
 from dtb import get_dtb
+from typing import Optional
+from pydantic import BaseModel
 
 router = APIRouter()
+
+class Task(BaseModel):
+    title:str
+    description: Optional[str] = None
+    status: str = "pending"
 
 @router.post("/api/tasks")
 def create_task(task: Task):
