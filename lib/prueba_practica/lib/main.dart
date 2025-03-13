@@ -32,7 +32,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
   @override
   void initState() {
     super.initState();
-    tasks = TaskService.fetchTasks();
+    tasks = TaskServicio.fetchTasks();
   }
 
   @override
@@ -57,15 +57,12 @@ class _TaskListScreenState extends State<TaskListScreen> {
               return ListTile(
                 title: Text(task.title),
                 subtitle: Text(task.status),
-                onTap: () {
-                  Navigator.push()
-                },
               );
             },
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(onPressed: ( async {
+      floatingActionButton: FloatingActionButton(onPressed: () async {
         final task = await Navigator.push(
           context,
           MaterialPageRoute(
@@ -74,13 +71,12 @@ class _TaskListScreenState extends State<TaskListScreen> {
         );
         if (task != null) {
           setState(() {
-            tasks = TaskService.fetchTasks();
+            tasks = TaskServicio.fetchTasks();
             });
         }
       },
       child: Icon(Icons.add),
       )
-      ),
     );
   }
 }
@@ -107,9 +103,9 @@ class TaskCreateScreen extends StatelessWidget {
             ),
             ElevatedButton(
               onPressed: () async {
-                final title = titleController.txt;
-                final description = descriptionController.txt;
-                final task = await TaskService.createTask(title, description);
+                final title = titleController.text;
+                final description = descriptionController.text;
+                final task = await TaskServicio.createTask(title, description);
                 Navigator.pop(context, task);
               },
               child: Text('Guardar'),
