@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
+import 'task_modelo.dart';
+import 'task_servicio.dart';
 
 void main() {
   runApp(const MyApp());
@@ -12,10 +15,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Task Manager',
-      theme: ThemeData( PrimarySwatch: Colors.blue),
-      colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-      useMaterial3: true,
-      ),
+      theme: ThemeData(primarySwatch: Colors.blue),
       home: TaskListScreen(),
     );
   }
@@ -44,26 +44,79 @@ class _TaskListScreenState extends State<TaskListScreen> {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
-        }
-        if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
-        }
-        final taskList = snapshot.data ?? [];
+          }
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
+          final taskList = snapshot.data ?? [];
 
-        return ListView.builder(
-          itemCount: taskList.length,
-          itemBuilder: (context, index){
-            final task = taskList[index];
-            return ListTile(
-              title: Text(task.title),
-              subtitle: Text(task.status),
-              onTap: () {
-                Navigator.push()
+          return ListView.builder(
+            itemCount: taskList.length,
+            itemBuilder: (context, index){
+              final task = taskList[index];
+              return ListTile(
+                title: Text(task.title),
+                subtitle: Text(task.status),
+                onTap: () {
+                  Navigator.push()
+                },
+              );
+            },
+          );
+        },
+      ),
+      floatingActionButton: FloatingActionButton(onPressed: ( async {
+        final task = await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => TaskCreateScreen(),
+          ),
+        );
+        if (task != null) {
+          setState(() {
+            tasks = TaskService.fetchTasks();
+            });
+        }
+      },
+      child: Icon(Icons.add),
+      )
+      ),
+    );
+  }
+}
+
+class TaskCreateScreen extends StatelessWidget {
+  final TextEditingController titleController = TextEditingController();
+  final TextEditingController descriptionController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Crear Tarea')),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [ 
+            TextField(
+              controller: titleController,
+              decoration: InputDecoration(labelText: 'Título'),
+            ),
+            TextField(
+            controller: descriptionController,
+            decoration: InputDecoration(labelText: 'Descripción'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final title = titleController.txt;
+                final description = descriptionController.txt;
+                final task = await TaskService.createTask(title, description);
+                Navigator.pop(context, task);
               },
-            );
-          },
-        )
-      );
+              child: Text('Guardar'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
